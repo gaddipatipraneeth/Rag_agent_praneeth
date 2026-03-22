@@ -1,12 +1,12 @@
 # System Architecture
-## Team: ___________________
-## Date: ___________________
+## Team: ____Group 5_______________
+## Date: ______03/16/2026_____________
 ## Members and Roles:
-- Corpus Architect: ___________________
-- Pipeline Engineer: ___________________
-- UX Lead: ___________________
-- Prompt Engineer: ___________________
-- QA Lead: ___________________
+- Corpus Architect: __Venkata Sai Praneeth Gaddipati_________________
+- Pipeline Engineer: _**Venkata Rama Krishna Nallabelli**_________________
+- UX Lead: ________Arvind Reddy Puchala___________
+- Prompt Engineer: ______Abhishek Karre_____________
+- QA Lead: _______Patel Mahi bharat____________
 
 ---
 
