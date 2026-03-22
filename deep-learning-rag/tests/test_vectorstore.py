@@ -32,6 +32,8 @@ from src.rag_agent.vectorstore.store import VectorStoreManager
 @pytest.fixture
 def sample_chunk() -> DocumentChunk:
     """A single valid DocumentChunk for use across tests."""
+    import uuid
+    unique_suffix = str(uuid.uuid4())[:8]
     metadata = ChunkMetadata(
         topic="LSTM",
         difficulty="intermediate",
@@ -41,7 +43,7 @@ def sample_chunk() -> DocumentChunk:
         is_bonus=False,
     )
     return DocumentChunk(
-        chunk_id=VectorStoreManager.generate_chunk_id("test_lstm.md", "test content"),
+        chunk_id=VectorStoreManager.generate_chunk_id("test_lstm.md", "test content " + unique_suffix),
         chunk_text=(
             "Long Short-Term Memory networks solve the vanishing gradient problem "
             "through gated mechanisms: the forget gate, input gate, and output gate. "
@@ -78,11 +80,13 @@ def bonus_chunk() -> DocumentChunk:
 def test_settings(tmp_path):
     """Settings with a temporary ChromaDB path and unique collection for testing."""
     import uuid
+    import os
+    unique_name = f"test_collection_{uuid.uuid4().hex}"
+    unique_path = str(tmp_path / "chroma_db")
+    os.environ['CHROMA_COLLECTION_NAME'] = unique_name
+    os.environ['CHROMA_DB_PATH'] = unique_path
     from src.rag_agent.config import Settings
-    return Settings(
-        chroma_db_path=str(tmp_path / "chroma_db"),
-        chroma_collection_name=f"test_collection_{uuid.uuid4().hex}"
-    )
+    return Settings()
 
 
 # ---------------------------------------------------------------------------
