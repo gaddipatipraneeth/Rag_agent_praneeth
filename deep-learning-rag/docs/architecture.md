@@ -1,5 +1,5 @@
 # System Architecture
-## Team: ____Group 5_______________
+## Team: ____Hackathon Winner Group 5______________
 ## Date: ______03/16/2026_____________
 ## Members and Roles:
 - Corpus Architect: __Venkata Sai Praneeth Gaddipati_________________
@@ -26,7 +26,16 @@ The diagram must show:
 
 *(replace this line with your diagram image or ASCII art)*
 
----
+Raw file (PDF/MD) -> DocumentChunker (chunk_file, _chunk_pdf/_chunk_markdown) -> DocumentChunk + ChunkMetadata
+   ↓
+VectorStoreManager.ingest() -> embed chunks -> dedupe by chunk_id (hash(source+text)) -> ChromaDB
+   ↓
+User query -> LangGraph:
+   query_rewrite_node -> retrieval_node -> should_retry_retrieval
+      |- no_context_found=True -> hallucination guard (end)
+      |- no_context_found=False -> generation_node -> AgentResponse
+   ↓
+Conversation memory in AgentState.messages, checkpoint via MemorySaver
 
 ## Component Descriptions
 
@@ -35,31 +44,38 @@ The diagram must show:
 - **Source files location:** `data/corpus/`
 - **File formats used:**
   *(which file types did your team ingest — .md, .pdf, or both?)*
+We have used .md, .pdf
 
 - **Landmark papers ingested:**
   *(list the papers your team located and ingested, one per line)*
-  -
-  -
-  -
+  -lstm.pdf
+  -ANN.odf
+  -RNN.pdf
 
 - **Chunking strategy:**
   *(what chunk size and overlap did you choose, and why?
   e.g. 512 characters with 50 overlap — justify this choice)*
-
+  PDF -> RecursiveCharacterTextSplitter chunk_size=512, overlap=50
+  Markdown -> MarkdownHeaderTextSplitter + recursive split
 - **Metadata schema:**
   *(list every metadata field your chunks carry and explain why each field exists)*
   | Field | Type | Purpose |
   |---|---|---|
-  | topic | string | |
-  | difficulty | string | |
-  | type | string | |
-  | source | string | |
-  | related_topics | list | |
-  | is_bonus | bool | |
+ Field	Type	Purpose
+ topic	string	Identify concept (CNN, RNN, etc.)
+ difficulty	string	Easy / Medium / Hard
+ type	string	Theory / Code / Explanation
+ source	string	File origin
+ related_topics	list	Cross-link concepts
+ is_bonus	bool	Extra advanced topics
 
 - **Duplicate detection approach:**
   *(how is the chunk ID generated? why is a content hash more reliable than a filename?)*
-
+ chunk_id = generate_chunk_id(source, text) using hash of source+chunk_text, stable and content-based.
+ Use content hash (e.g., SHA256)
+ More reliable than filename because:
+ Same content may have different filenames
+ Prevents duplicate embeddings
 - **Corpus coverage:**
   - [ ] ANN
   - [ ] CNN
@@ -67,37 +83,34 @@ The diagram must show:
   - [ ] LSTM
   - [ ] Seq2Seq
   - [ ] Autoencoder
-  - [ ] SOM *(bonus)*
-  - [ ] Boltzmann Machine *(bonus)*
-  - [ ] GAN *(bonus)*
-
----
 
 ### Vector Store Layer
 
 - **Database:** ChromaDB — PersistentClient
 - **Local persistence path:** *(what is your CHROMA_DB_PATH?)*
-
+Database: ChromaDB via local persistence path from settings (likely CHROMA_DB_PATH)
 - **Embedding model:**
   *(name and provider — e.g. all-MiniLM-L6-v2 via sentence-transformers)*
-
+Embedding model: probably all-MiniLM-L6-v2 or local model inside rag_agent.vectorstore.store config
 - **Why this embedding model:**
   *(what tradeoffs did you consider? speed vs quality? local vs API?)*
-
+Fast (low latency)
+Good semantic performance
+Runs locally (no API cost)
 - **Similarity metric:**
   *(cosine or dot product — which did you use and why?)*
-
+Cosine similarity
+Works best for normalized embeddings
 - **Retrieval k:**
   *(how many chunks do you retrieve per query and why?)*
-
+Retrieval k: get_settings().retrieval_k (default guess 5-10)
 - **Similarity threshold:**
   *(what is your minimum score to pass the hallucination guard?
   how did you arrive at this number?)*
-
+Similarity threshold in retrieval/hallucination guard: in generation_node, no_context if no chunks; can be >= set threshold in VectorStoreManager
 - **Metadata filtering:**
   *(can users filter by topic or difficulty? how is this implemented?)*
-
----
+topic_filter/difficulty_filter fields in AgentState; used in query process if implemented in VectorStoreManager.query().
 
 ### Agent Layer
 
@@ -107,38 +120,40 @@ The diagram must show:
   *(describe what each node does in one sentence)*
   | Node | Responsibility |
   |---|---|
-  | query_rewrite_node | |
-  | retrieval_node | |
-  | generation_node | |
+ query_rewrite_node: rewrite user question to search-friendly form.
+retrieval_node: query vector DB and get candidate chunks.
+generation_node: build context, call LLM, and format answer.
 
 - **Conditional edges:**
   *(what condition triggers each edge? what happens when no context is found?)*
-
+should_retry_retrieval: returns end if no context, generate if has context.
+0-context -> hallucination guard path returns safe message.
 - **Hallucination guard:**
   *(exactly what does your system return when similarity threshold is not met?
   paste the message here)*
-
+I was unable to find relevant information ... please try ...
 - **Query rewriting:**
   *(give one example of a raw user query and how your system rewrites it)*
   - Raw query:
   - Rewritten query:
-
+How do LSTMs remember information?”
+rewritten: maybe “LSTM long-term memory cell state gate mechanisms”
 - **Conversation memory:**
   *(how is history maintained across turns? what happens when context window fills up?)*
-
+stored in AgentState.messages; trimmed by trim_messages with max_context_tokens.
 - **LLM provider:**
   *(which provider did your team use — Groq, Ollama, or LM Studio? which model?)*
-
+from LLMFactory in config. could be langchain-groq, ollama, or local.
 - **Why this provider:**
   *(what was the deciding factor for your team?)*
-
+likely local/private or low-cost speed and isolated environment.
 ---
 
 ### Prompt Layer
 
 - **System prompt summary:**
   *(describe the agent persona and the key constraints in your system prompt)*
-
+rag_agent.agent.prompts.SYSTEM_PROMPT — persona as helpful deep learning content researcher + safety/hallucination guard.
 - **Question generation prompt:**
   *(what inputs does it take and what does it return?)*
 
@@ -161,7 +176,7 @@ The diagram must show:
 - **Framework:** *(Streamlit / Gradio)*
 - **Deployment platform:** *(Streamlit Community Cloud / HuggingFace Spaces)*
 - **Public URL:** *(paste your deployed app URL here once live)*
-
+http://localhost:8501/
 - **Ingestion panel features:**
   *(describe what the user sees — file uploader, status display, document list)*
 
