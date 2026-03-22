@@ -1,12 +1,12 @@
 # System Architecture
-## Team: ____Hackathon Winner Group 5______________
-## Date: ______03/16/2026_____________
+## Team: Hackathon Winner Group 5
+## Date: 03/16/2026
 ## Members and Roles:
-- Corpus Architect: __Venkata Sai Praneeth Gaddipati_________________
-- Pipeline Engineer: _**Venkata Rama Krishna Nallabelli**_________________
-- UX Lead: ________Arvind Reddy Puchala___________
-- Prompt Engineer: ______Abhishek Karre_____________
-- QA Lead: _______Patel Mahi bharat____________
+- Corpus Architect: __Venkata Sai Praneeth Gaddipati__
+- Pipeline Engineer: _**Venkata Rama Krishna Nallabelli**
+- UX Lead: ________Arvind Reddy Puchala________
+- Prompt Engineer: ______Abhishek Karre______
+- QA Lead: _______Patel Mahi bharat______
 
 ---
 
